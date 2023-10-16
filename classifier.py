@@ -11,21 +11,23 @@ import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
 def aucCV(features,labels):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'),
-                          SVC(probability=True))
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'), StandardScaler(),
+                          KNeighborsClassifier(n_neighbors=3, probability=True))
     scores = cross_val_score(model,features,labels,cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'), ## Changed imputation strategy
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'), StandardScaler(), ## Changed imputation strategy
                           SVC(probability=True))
     model.fit(trainFeatures,trainLabels)
     
@@ -69,5 +71,5 @@ if __name__ == "__main__":
     plt.plot(np.arange(nTestExamples),testOutputs[sortIndex],'r.')
     plt.xlabel('Sorted example number')
     plt.ylabel('Output (predicted target)')
-    plt.show()
+    ###     plt.show()
     
