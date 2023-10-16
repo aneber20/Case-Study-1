@@ -1,3 +1,4 @@
+## Tweak baseline classifier to see how it can be improved
 # -*- coding: utf-8 -*-
 """
 Demo of 10-fold cross-validation using Gaussian naive Bayes on spam data
@@ -8,6 +9,7 @@ Demo of 10-fold cross-validation using Gaussian naive Bayes on spam data
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score
@@ -15,16 +17,16 @@ from sklearn.metrics import roc_auc_score
 
 def aucCV(features,labels):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'),
-                          GaussianNB())
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'),
+                          SVC(probability=True))
     scores = cross_val_score(model,features,labels,cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'),
-                          GaussianNB())
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'), ## Changed imputation strategy
+                          SVC(probability=True))
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
@@ -67,4 +69,5 @@ if __name__ == "__main__":
     plt.plot(np.arange(nTestExamples),testOutputs[sortIndex],'r.')
     plt.xlabel('Sorted example number')
     plt.ylabel('Output (predicted target)')
+    plt.show()
     
