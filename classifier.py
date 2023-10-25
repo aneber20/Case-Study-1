@@ -13,22 +13,37 @@ from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, Normalizer
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
+'''
+def aucCV(features, labels):
+    pipe = Pipeline(steps=[('scaler', StandardScaler()), ('imputer', SimpleImputer(missing_values=-1, strategy='median')), 
+                           ('svm', SVC(kernel='rbf', probability=True))])
+    param_grid = {
+        "svm__C": [0.25, 0.5, 1, 2.5, 5, 10],
+        "svm__degree": [2, 3, 5, 7],
+        "svm__gamma": ['scale', 'auto', 1, 3, 5]
+    }
+    search = GridSearchCV(pipe, param_grid, n_jobs=-1)
+    search.fit(features, labels)
+'''
+
 def aucCV(features,labels):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'), StandardScaler(),
-                          KNeighborsClassifier(n_neighbors=3, probability=True))
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'), StandardScaler(),
+                          SVC(kernel='rbf', C=0.25, degree=2, probability=True, gamma='scale'))
     scores = cross_val_score(model,features,labels,cv=10,scoring='roc_auc')
     
     return scores
 
+
 def predictTest(trainFeatures,trainLabels,testFeatures):
     # model = GaussianNB()
-    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='mean'), StandardScaler(), ## Changed imputation strategy
-                          SVC(probability=True))
+    model = make_pipeline(SimpleImputer(missing_values=-1, strategy='median'), StandardScaler(), ## Changed imputation strategy
+                          SVC(probability=True, kernel='rbf', C=0.25, degree=2, gamma='scale'))
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
@@ -71,5 +86,5 @@ if __name__ == "__main__":
     plt.plot(np.arange(nTestExamples),testOutputs[sortIndex],'r.')
     plt.xlabel('Sorted example number')
     plt.ylabel('Output (predicted target)')
-    ###     plt.show()
+    plt.show()
     
